@@ -1,70 +1,57 @@
+import { useEffect, useState } from 'react'
+import TicTacToe from './components/TicTacToe'
+import GAControls from './components/GAControls'
+import { api, BASE_URL } from './lib/api'
+
 function App() {
+  const [summary, setSummary] = useState(null)
+
+  useEffect(()=>{ api.metricsSummary().then(setSummary).catch(()=>{}) },[])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Subtle pattern overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)]"></div>
 
-      <div className="relative min-h-screen flex items-center justify-center p-8">
-        <div className="max-w-2xl w-full">
-          {/* Header with Flames icon */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center mb-6">
-              <img
-                src="/flame-icon.svg"
-                alt="Flames"
-                className="w-24 h-24 drop-shadow-[0_0_25px_rgba(59,130,246,0.5)]"
-              />
-            </div>
-
-            <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
-              Flames Blue
-            </h1>
-
-            <p className="text-xl text-blue-200 mb-6">
-              Build applications through conversation
-            </p>
-          </div>
-
-          {/* Instructions */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-blue-500/20 rounded-2xl p-8 shadow-xl mb-6">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold">
-                1
-              </div>
-              <div>
-                <h3 className="font-semibold text-white mb-1">Describe your idea</h3>
-                <p className="text-blue-200/80 text-sm">Use the chat panel on the left to tell the AI what you want to build</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4 mb-6">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold">
-                2
-              </div>
-              <div>
-                <h3 className="font-semibold text-white mb-1">Watch it build</h3>
-                <p className="text-blue-200/80 text-sm">Your app will appear in this preview as the AI generates the code</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold">
-                3
-              </div>
-              <div>
-                <h3 className="font-semibold text-white mb-1">Refine and iterate</h3>
-                <p className="text-blue-200/80 text-sm">Continue the conversation to add features and make changes</p>
-              </div>
+      <div className="relative min-h-screen p-6 md:p-10">
+        <header className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3 text-white">
+            <img src="/flame-icon.svg" className="w-10 h-10" />
+            <div>
+              <div className="text-xl font-semibold">Adaptive Tic-Tac-Toe</div>
+              <div className="text-white/60 text-xs">Backend: {BASE_URL}</div>
             </div>
           </div>
+          <a href="/test" className="text-white/80 hover:text-white text-sm underline">System Test</a>
+        </header>
 
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-sm text-blue-300/60">
-              No coding required • Just describe what you want
-            </p>
-          </div>
-        </div>
+        <main className="grid lg:grid-cols-2 gap-6 relative z-10">
+          <section className="bg-slate-800/50 border border-blue-500/20 rounded-2xl p-6">
+            <h2 className="text-white text-lg font-semibold mb-4">Play</h2>
+            <TicTacToe />
+          </section>
+
+          <section className="bg-slate-800/50 border border-blue-500/20 rounded-2xl p-6">
+            <h2 className="text-white text-lg font-semibold mb-4">Train AI (Genetic Algorithm)</h2>
+            <GAControls onBest={() => api.metricsSummary().then(setSummary).catch(()=>{})} />
+
+            {summary && (
+              <div className="mt-6 bg-white/5 border border-white/10 rounded p-4 text-white text-sm">
+                <div className="font-semibold mb-2">Summary</div>
+                {summary.best_strategy ? (
+                  <div>
+                    <div>Best Strategy: <span className="font-mono">{summary.best_strategy.name}</span> (fitness {summary.best_strategy.fitness?.toFixed?.(2)})</div>
+                  </div>
+                ) : (
+                  <div>No strategy yet. Run GA to produce one.</div>
+                )}
+              </div>
+            )}
+          </section>
+        </main>
+
+        <footer className="mt-10 text-center text-white/60 text-xs">
+          Metrics shown: execution time, memory, node count (search). GA displays convergence across generations.
+        </footer>
       </div>
     </div>
   )
